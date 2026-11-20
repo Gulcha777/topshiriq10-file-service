@@ -1,0 +1,226 @@
+{
+  "info": {
+    "name": "File Service & Global Exception Handler - Topshiriq 10",
+    "_postman_id": "a10-topshiriq10-collection-2026",
+    "description": "Topshiriq 10 (A10): Fayllarni yuklash, thumbnail, yuklab olish va Global Exception Handler (400, 404, 413, 500) testlari.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "uploadedFileId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Muvaffaqiyatli oqim (Upload, Thumbnail, Download)",
+      "item": [
+        {
+          "name": "GET /health - Xizmat holati (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          }
+        },
+        {
+          "name": "POST /api/v1/files/upload - PNG rasm yuklash (201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('uploadedFileId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "docs/samples/sample.png"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/v1/files/upload"
+          }
+        },
+        {
+          "name": "GET /api/v1/files/{{uploadedFileId}} - Metama'lumotlar (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/files/{{uploadedFileId}}"
+          }
+        },
+        {
+          "name": "GET /api/v1/files/{{uploadedFileId}}/thumbnail - Thumbnail (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/files/{{uploadedFileId}}/thumbnail"
+          }
+        },
+        {
+          "name": "GET /api/v1/files/{{uploadedFileId}}/download - Yuklab olish (200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/files/{{uploadedFileId}}/download"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Global Exception Handler (400, 404, 413, 500)",
+      "item": [
+        {
+          "name": "POST /api/v1/files/upload - Ruxsat etilmagan fayl turi (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.expect(pm.response.json()).to.include.all.keys('timestamp','status','error','message','path');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "virus.exe"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/v1/files/upload"
+          }
+        },
+        {
+          "name": "POST /api/v1/files/upload - 5 MB dan katta fayl (413)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 413', () => pm.response.to.have.status(413));",
+                  "pm.expect(pm.response.json().error).to.eql('Payload Too Large');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "large.pdf"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/v1/files/upload"
+          }
+        },
+        {
+          "name": "GET /api/v1/files/unknown-id - Topilmadi (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/files/00000000-0000-0000-0000-000000000000"
+          }
+        },
+        {
+          "name": "GET /api/v1/demo-error?kind=crash - Ichki xatolik (500)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 500', () => pm.response.to.have.status(500));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/demo-error?kind=crash"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "File Upload & Global Exception Handler API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/files/upload": {
+      "post": {
+        "summary": "Fayl yuklash (multipart/form-data)"
+      }
+    },
+    "/api/v1/files": {
+      "get": {
+        "summary": "Fayllar ro'yxati"
+      }
+    },
+    "/api/v1/files/{file_id}": {
+      "get": {
+        "summary": "Fayl metama'lumotlari"
+      },
+      "delete": {
+        "summary": "Faylni o'chirish"
+      }
+    },
+    "/api/v1/files/{file_id}/download": {
+      "get": {
+        "summary": "Asl faylni yuklab olish"
+      }
+    },
+    "/api/v1/files/{file_id}/thumbnail": {
+      "get": {
+        "summary": "Thumbnail rasmni yuklab olish"
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Xizmat holati"
+      }
+    }
+  }
+}
